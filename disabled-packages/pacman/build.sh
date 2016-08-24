@@ -1,13 +1,13 @@
 # HEAVILY adapted from archlinux PKGBUILD
 pkgname=pacman
-pkgver=4.2.1
+pkgver=5.0.1
 
 TERMUX_PKG_HOMEPAGE=https://www.archlinux.org/pacman/
 TERMUX_PKG_DESCRIPTION="A library-based package manager with dependency support"
 TERMUX_PKG_VERSION=$pkgver
 
 #FIXME: asciidoc, fakechroot/fakeroot
-TERMUX_PKG_DEPENDS="bash, glib, libarchive, curl, gpgme, python2, libandroid-glob, libandroid-support"
+TERMUX_PKG_DEPENDS="bash, glib, libarchive, curl, gpgme, python2, openssl, libandroid-glob, libandroid-support"
 
 TERMUX_PKG_SRCURL="https://sources.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz"
 TERMUX_PKG_BUILD_IN_SRC=yes
@@ -15,13 +15,13 @@ TERMUX_PKG_MAINTAINER="Francisco Demartino <demartino.francisco@gmail.com>"
 
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--prefix=$TERMUX_PREFIX --sysconfdir=$TERMUX_PREFIX/etc"
 TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" --localstatedir=$TERMUX_PREFIX/var --enable-doc "
-TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" --with-scriptlet-shell=/usr/bin/bash"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" --with-scriptlet-shell=$TERMUX_PREFIX/bin/bash"
 
 
 export LDFLAGS="$LDFLAGS -llog -landroid-glob"
 
 termux_step_make () {
-  make
+  make CFLAGS=-DLINE_MAX=80
   make -C contrib
   # make -C "$pkgname-$pkgver" check
 }
@@ -46,6 +46,11 @@ termux_step_make_install () {
       mycarch="arm"
       mychost="arm-unknown-linux-gnu"
       myflags="-march=arm"
+      ;;
+    aarch64)
+      mycarch="aarch64"
+      mychost="aarch64-unknown-linux-gnu"
+      myflags="-march=armv8-a "
       ;;
   esac
 
